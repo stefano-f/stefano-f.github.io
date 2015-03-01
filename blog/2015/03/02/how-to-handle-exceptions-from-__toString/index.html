@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
 
     <title>
-        How to output a grid with Twig and Boostrap &middot; Stefano
+        How to handle exceptions from __toString &middot; Stefano
         </title>
 
     <!-- CSS -->
@@ -82,88 +82,56 @@
     <div class="container content">
         
 <div class="post">
-    <h1 class="post-title">How to output a grid with Twig and Boostrap</h1>
-    <span class="post-date">August 11th, 2014</span>
-    <p>With Twig, the easiest way to format a result-set into a grid is through
-the <a href="http://twig.sensiolabs.org/doc/filters/batch.html">batch filter</a>:</p>
+    <h1 class="post-title">How to handle exceptions from __toString</h1>
+    <span class="post-date">March 2nd, 2015</span>
+    <p>in response to the accepted answer, I came up with a (perhaps) better way to handle exceptions inside <code>__toString()</code>:</p>
 
-<pre><code class="twig">
-{% set items = ['a', 'b', 'c', 'd', 'e', 'f', 'g'] %}
+<pre><code>public function __toString()
+{
+    try {
+        // ... do some stuff
+        // and try to return a string
+        $string = $this-&gt;doSomeStuff();
+        if (!is_string($string)) {
+            // we must throw an exception manually here because if $value
+            // is not a string, PHP will trigger an error right after the
+            // return statement, thus escaping our try/catch.
+            throw new \LogicException(__CLASS__ . "__toString() must return a string");
+        }
 
-{% for row in items|batch(3) %}
-&lt;div class="row"&gt;
-    {% for cell in row %}
-        &lt;div class="col-xs-4"&gt;{{ cell }}&lt;/div&gt;
-    {% endfor %}
-&lt;/div&gt;
-{% endfor %}
-
+        return $string;
+    } catch (\Exception $exception) {
+        $previousHandler = set_exception_handler(function (){
+        });
+        restore_error_handler();
+        call_user_func($previousHandler, $exception);
+        die;
+    }
+}
 </code></pre>
 
-<p>The example above will output a 3 column grid. Just make sure to adjust your
-css classes to set the cells' width accordingly.</p>
+<p>This assumes there is an exception handler defined, which is the case for most frameworks. As with the <code>trigger_error</code> method, <strong>doing this will defy the purpose of try..catch</strong>, but still it is much better than dumping output with <code>echo</code>. Also, many framework transform errors into exceptions, so <code>trigger_error</code> won't work anyway.</p>
 
-<p>If you want to output a table instead, you can follow this example from the
-official documentation:</p>
+<p>As an added bonus, you'll get a full stack-trace as with normal exceptions and the normal dev-production behaviour of your framework of choice.</p>
 
-<pre><code class="twig">
-{% set items = ['a', 'b', 'c', 'd', 'e', 'f', 'g'] %}
+<p>Works very well in Laravel, and I'm pretty sure it'll work in pretty much all the modern PHP frameworks out there.</p>
 
-&lt;table&gt;
-{% for row in items|batch(3, 'No item') %}
-    &lt;tr&gt;
-        {% for column in row %}
-            &lt;td&gt;{{ column }}&lt;/td&gt;
-        {% endfor %}
-    &lt;/tr&gt;
-{% endfor %}
-&lt;/table&gt;
+<p>Screenshot relevant:<br />
+<em>note</em>: in this example, <code>output()</code> is called by a <code>__toString()</code> method.</p>
 
-</code></pre>
-
-<p>Here's also a full example of a Bootstrap <a href="http://getbootstrap.com/components/#media">media</a>
-grid, plus Laravel pagination:</p>
-
-<pre><code class="twig">
-{% for row in items|batch(2) %}
-&lt;div class="row"&gt;
-    {% for i in row %}
-    &lt;div class="media col-xs-6"&gt;
-        {% if i.photo|trim %}
-        &lt;a class="pull-left" href="/post/{{ i.id }}"&gt;
-            &lt;img class="media-object" src="/uploads/{{ i.filename }}" alt="{{ i.title }}"&gt;
-        &lt;/a&gt;
-        {% endif %}
-        &lt;div class="media-body"&gt;
-            &lt;a href="/post/{{ i.id }}"&gt;
-                &lt;h4 class="media-heading"&gt;{{ i.title }}&lt;/h4&gt;
-            &lt;/a&gt;
-            &lt;div class="date"&gt;{{ i.publication_date|date('M d, Y') }}&lt;/div&gt;
-            &lt;p&gt;{{ Str_words(i.body|striptags, 20) }}&lt;/p&gt;
-            &lt;a href="/post/{{ i.id }}" class="read-more"&gt;Read more &amp;rarr;&lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-    {% endfor %}
-&lt;/div&gt;
-{% endfor %}
-
-{{ items.appends(Input_except('page')).links()|raw }}
-
-</code></pre>
-
-<p>Enjoy!</p>
+<p><img src="http://i.stack.imgur.com/iaBy6.png" alt="__toString() exception caught by Laravel exception handler" /></p>
 
 
             <p class="tags">
         Tags:
-                <a href="/blog/tags/twig">twig</a>,                 <a href="/blog/tags/laravel">laravel</a>            </p>
+                <a href="/blog/tags/php">php</a>            </p>
     </div>
 
 
 <div class="pagination">
-         <a class="pagination-item newer" href="/blog/2015/03/02/how-to-handle-exceptions-from-__toString" title="How to handle exceptions from __toString">How to handle exceptions from __toString</a>
+            <span class="pagination-item newer">Newer</span>
     
-        <a class="pagination-item older" href="/blog/2014/08/09/use_php_functions_in_twig" title="How to use any PHP function in Twig">How to use any PHP function in Twig</a>
+        <a class="pagination-item older" href="/blog/2014/08/11/easy-grid-with-twig" title="How to output a grid with Twig and Boostrap">How to output a grid with Twig and Boostrap</a>
     
 </div>
 

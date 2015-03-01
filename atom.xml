@@ -3,9 +3,52 @@
     <title><![CDATA[Stefano]]></title>
     <link href="/atom.xml" rel="self"/>
     <link href="/"/>
-    <updated>2015-03-01T22:15:26+01:00</updated>
+    <updated>2015-03-02T00:10:07+01:00</updated>
     <id>/</id>
         <generator uri="http://sculpin.io/">Sculpin</generator>
+            <entry>
+            <title type="html"><![CDATA[How to handle exceptions from __toString]]></title>
+            <link href="/blog/2015/03/02/how-to-handle-exceptions-from-__toString"/>
+            <updated>2015-03-02T00:00:00+01:00</updated>
+            <id>/blog/2015/03/02/how-to-handle-exceptions-from-__toString</id>
+            <content type="html"><![CDATA[<p>in response to the accepted answer, I came up with a (perhaps) better way to handle exceptions inside <code>__toString()</code>:</p>
+
+<pre><code>public function __toString()
+{
+    try {
+        // ... do some stuff
+        // and try to return a string
+        $string = $this-&gt;doSomeStuff();
+        if (!is_string($string)) {
+            // we must throw an exception manually here because if $value
+            // is not a string, PHP will trigger an error right after the
+            // return statement, thus escaping our try/catch.
+            throw new \LogicException(__CLASS__ . "__toString() must return a string");
+        }
+
+        return $string;
+    } catch (\Exception $exception) {
+        $previousHandler = set_exception_handler(function (){
+        });
+        restore_error_handler();
+        call_user_func($previousHandler, $exception);
+        die;
+    }
+}
+</code></pre>
+
+<p>This assumes there is an exception handler defined, which is the case for most frameworks. As with the <code>trigger_error</code> method, <strong>doing this will defy the purpose of try..catch</strong>, but still it is much better than dumping output with <code>echo</code>. Also, many framework transform errors into exceptions, so <code>trigger_error</code> won't work anyway.</p>
+
+<p>As an added bonus, you'll get a full stack-trace as with normal exceptions and the normal dev-production behaviour of your framework of choice.</p>
+
+<p>Works very well in Laravel, and I'm pretty sure it'll work in pretty much all the modern PHP frameworks out there.</p>
+
+<p>Screenshot relevant:<br />
+<em>note</em>: in this example, <code>output()</code> is called by a <code>__toString()</code> method.</p>
+
+<p><img src="http://i.stack.imgur.com/iaBy6.png" alt="__toString() exception caught by Laravel exception handler" /></p>
+]]></content>
+        </entry>
             <entry>
             <title type="html"><![CDATA[How to output a grid with Twig and Boostrap]]></title>
             <link href="/blog/2014/08/11/easy-grid-with-twig"/>
