@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title><![CDATA[Stefano]]></title>
+    <link href="/blog/tags/twig.xml" rel="self"/>
+    <link href="/"/>
+    <updated>2015-03-01T22:08:51+01:00</updated>
+    <id>/</id>
+        <generator uri="http://sculpin.io/">Sculpin</generator>
+            <entry>
+            <title type="html"><![CDATA[How to output a grid with Twig and Boostrap]]></title>
+            <link href="/blog/2014/08/11/easy-grid-with-twig"/>
+            <updated>2014-08-11T00:00:00+02:00</updated>
+            <id>/blog/2014/08/11/easy-grid-with-twig</id>
+            <content type="html"><![CDATA[<p>With Twig, the easiest way to format a result-set into a grid is through
+the <a href="http://twig.sensiolabs.org/doc/filters/batch.html">batch filter</a>:</p>
+
+<pre><code class="twig">
+{% set items = ['a', 'b', 'c', 'd', 'e', 'f', 'g'] %}
+
+{% for row in items|batch(3) %}
+&lt;div class="row"&gt;
+    {% for cell in row %}
+        &lt;div class="col-xs-4"&gt;{{ cell }}&lt;/div&gt;
+    {% endfor %}
+&lt;/div&gt;
+{% endfor %}
+
+</code></pre>
+
+<p>The example above will output a 3 column grid. Just make sure to adjust your
+css classes to set the cells' width accordingly.</p>
+
+<p>If you want to output a table instead, you can follow this example from the
+official documentation:</p>
+
+<pre><code class="twig">
+{% set items = ['a', 'b', 'c', 'd', 'e', 'f', 'g'] %}
+
+&lt;table&gt;
+{% for row in items|batch(3, 'No item') %}
+    &lt;tr&gt;
+        {% for column in row %}
+            &lt;td&gt;{{ column }}&lt;/td&gt;
+        {% endfor %}
+    &lt;/tr&gt;
+{% endfor %}
+&lt;/table&gt;
+
+</code></pre>
+
+<p>Here's also a full example of a Bootstrap <a href="http://getbootstrap.com/components/#media">media</a>
+grid, plus Laravel pagination:</p>
+
+<pre><code class="twig">
+{% for row in items|batch(2) %}
+&lt;div class="row"&gt;
+    {% for i in row %}
+    &lt;div class="media col-xs-6"&gt;
+        {% if i.photo|trim %}
+        &lt;a class="pull-left" href="/post/{{ i.id }}"&gt;
+            &lt;img class="media-object" src="/uploads/{{ i.filename }}" alt="{{ i.title }}"&gt;
+        &lt;/a&gt;
+        {% endif %}
+        &lt;div class="media-body"&gt;
+            &lt;a href="/post/{{ i.id }}"&gt;
+                &lt;h4 class="media-heading"&gt;{{ i.title }}&lt;/h4&gt;
+            &lt;/a&gt;
+            &lt;div class="date"&gt;{{ i.publication_date|date('M d, Y') }}&lt;/div&gt;
+            &lt;p&gt;{{ Str_words(i.body|striptags, 20) }}&lt;/p&gt;
+            &lt;a href="/post/{{ i.id }}" class="read-more"&gt;Read more &amp;rarr;&lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    {% endfor %}
+&lt;/div&gt;
+{% endfor %}
+
+{{ items.appends(Input_except('page')).links()|raw }}
+
+</code></pre>
+
+<p>Enjoy!</p>
+]]></content>
+        </entry>
+            <entry>
+            <title type="html"><![CDATA[How to use any PHP function in Twig]]></title>
+            <link href="/blog/2014/08/09/use_php_functions_in_twig"/>
+            <updated>2014-08-09T00:00:00+02:00</updated>
+            <id>/blog/2014/08/09/use_php_functions_in_twig</id>
+            <content type="html"><![CDATA[<p>A common reason I hear for using Blade instead of Twig with Laravel
+is the need to register with Twig each PHP function you need before
+you can use it in your templates.</p>
+
+<p>This is by design, but there's a way around, if you need it:</p>
+
+<pre><code class="php">$twig-&gt;addFunction(new Twig_SimpleFunction('php_*', function() {
+    $arguments = func_get_args();
+    $function = array_shift($arguments);
+    return call_user_func_array($function, $arguments);
+    }
+));
+</code></pre>
+
+<p>Now you can use whatever function you want in your templates, for example
+the much needed <a href="http://php.net/manual/en/function.str-rot13.php">str_rot13</a>:</p>
+
+<pre><code class="twig">
+rot13 with makes me {{ php_str_rot13("happy")}} !
+
+</code></pre>
+
+<p>Just in case you use Laravel and the excellent
+<a href="https://github.com/rcrowe/TwigBridge">TwigBridge by Rcrowe</a> I suggest you to
+register this catch all function inside <code>start/global.php</code> in this way:</p>
+
+<pre><code class="php">Event::listen('twigbridge.twig', function(Twig_Environment $twig) {
+    $twig-&gt;addFunction(new Twig_SimpleFunction('php_*', function() {
+        $arguments = func_get_args();
+        $function = array_shift($arguments);
+        return call_user_func_array($function, $arguments);
+    }
+    ));
+});
+</code></pre>
+
+<p>From now on you'll be able to use any PHP function you like by just prepending
+<code>php_</code> to the name of the function.</p>
+]]></content>
+        </entry>
+    </feed>
