@@ -3,7 +3,7 @@
     <title><![CDATA[Stefano]]></title>
     <link href="/blog/tags/php.xml" rel="self"/>
     <link href="/"/>
-    <updated>2015-03-02T00:10:07+01:00</updated>
+    <updated>2015-03-02T00:29:44+01:00</updated>
     <id>/</id>
         <generator uri="http://sculpin.io/">Sculpin</generator>
             <entry>
@@ -11,7 +11,9 @@
             <link href="/blog/2015/03/02/how-to-handle-exceptions-from-__toString"/>
             <updated>2015-03-02T00:00:00+01:00</updated>
             <id>/blog/2015/03/02/how-to-handle-exceptions-from-__toString</id>
-            <content type="html"><![CDATA[<p>in response to the accepted answer, I came up with a (perhaps) better way to handle exceptions inside <code>__toString()</code>:</p>
+            <content type="html"><![CDATA[<p>This is a modified excerpt of an <a href="http://stackoverflow.com/a/27307132/358813">answer of mine on StackOverflow</a>.</p>
+
+<p>I came up with a (perhaps) better way to handle exceptions inside <code>__toString()</code>:</p>
 
 <pre><code>public function __toString()
 {
