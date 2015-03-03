@@ -3,7 +3,7 @@
     <title><![CDATA[Stefano]]></title>
     <link href="/blog/tags/php.xml" rel="self"/>
     <link href="/"/>
-    <updated>2015-03-03T22:50:42+01:00</updated>
+    <updated>2015-03-03T23:00:56+01:00</updated>
     <id>/</id>
         <generator uri="http://sculpin.io/">Sculpin</generator>
             <entry>
@@ -73,7 +73,7 @@ php &gt; $driver-&gt;methodTwo();
 PHP Fatal error:  Call to protected method Driver::methodTwo() from context '' in php shell code on line 1
 </code></pre>
 
-<p>As you see, the method has been hidden and it unreachable from the outer context.</p>
+<p>As you see, the method has been hidden and it's unreachable from the outer context.</p>
 
 <h2>Nota bene</h2>
 

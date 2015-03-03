@@ -109,8 +109,8 @@ class Driver extends Utility
 </code></pre>
 
 <p>If you're trying to reduce the visibility of a method of an existing class, you're out of luck. You'll
-have to either override the method and have it throw a <code>BadMethodException</code>, change the code of the
-superclass or just live with it.</p>
+have to either override the method to make it throw a <code>BadMethodException</code>, change the code of the
+superclass or, perhaps, just live with it.</p>
 
 <p>It turns out though, that PHP <strong>supports</strong> reducing the visibility of a method defined inside a <em>trait</em>.
 So, if you know that you'll need to hide methods of a superclass, you might consider to implement
@@ -146,11 +146,11 @@ php &gt; $driver-&gt;methodTwo();
 PHP Fatal error:  Call to protected method Driver::methodTwo() from context '' in php shell code on line 1
 </code></pre>
 
-<p>As you see, the method has been hidden and it unreachable from the outer context.</p>
+<p>As you see, the method has been hidden and it's unreachable from the outer context.</p>
 
 <h2>Nota bene</h2>
 
-<p>As with normal protected and private methods, you cannot use <code>method_exists</code> to check if a 
+<p>As usual with protected and private methods, you cannot use <code>method_exists</code> to check if a 
 method is callable or not, as it will return true no matter what the visibility is. You have to use <code>is_callable</code>:</p>
 
 <pre><code class="php">php &gt; var_dump(is_callable([$driver, 'methodOne']));
