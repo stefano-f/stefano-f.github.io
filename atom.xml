@@ -3,9 +3,92 @@
     <title><![CDATA[Stefano]]></title>
     <link href="/atom.xml" rel="self"/>
     <link href="/"/>
-    <updated>2015-03-02T23:55:57+01:00</updated>
+    <updated>2015-03-03T22:50:42+01:00</updated>
     <id>/</id>
         <generator uri="http://sculpin.io/">Sculpin</generator>
+            <entry>
+            <title type="html"><![CDATA[How to hide a class method in PHP]]></title>
+            <link href="/blog/2015/03/04/how-to-hide-a-class-method-in-php"/>
+            <updated>2015-03-04T00:00:00+01:00</updated>
+            <id>/blog/2015/03/04/how-to-hide-a-class-method-in-php</id>
+            <content type="html"><![CDATA[<p>In languages such as Java you can <a href="http://docs.oracle.com/javase/tutorial/java/IandI/override.html">hide methods</a> by overriding a public method of the superclass with a protected or private method in the subclass.</p>
+
+<p>PHP does not supports this with the classical inheritance, and will fail badly if you even try:</p>
+
+<pre><code class="php">class Utility { 
+    public function methodTwo()
+    {
+
+    }
+}
+class Driver extends Utility 
+{ 
+    protected function methodTwo()
+    {
+
+    }
+}
+</code></pre>
+
+<p>The code above will throw a fatal error:</p>
+
+<pre><code>PHP Fatal error:  Access level to Utility::methodTwo() must be public (as in class Utility) in php shell code on line 1
+</code></pre>
+
+<p>If you're trying to reduce the visibility of a method of an existing class, you're out of luck. You'll
+have to either override the method and have it throw a <code>BadMethodException</code>, change the code of the
+superclass or just live with it.</p>
+
+<p>It turns out though, that PHP <strong>supports</strong> reducing the visibility of a method defined inside a <em>trait</em>.
+So, if you know that you'll need to hide methods of a superclass, you might consider to implement
+such superclass as a trait:</p>
+
+<pre><code class="php">trait Utility {
+    public function methodOne() 
+    {
+
+    }
+    public function methodTwo() 
+    {
+
+    }
+}
+
+class Driver {
+
+    use Utility;
+
+    protected function methodTwo()
+    {
+
+    }
+}
+</code></pre>
+
+<p>And here we go:</p>
+
+<pre><code class="php">php &gt; $driver = new Driver;
+php &gt; $driver-&gt;methodTwo();
+
+PHP Fatal error:  Call to protected method Driver::methodTwo() from context '' in php shell code on line 1
+</code></pre>
+
+<p>As you see, the method has been hidden and it unreachable from the outer context.</p>
+
+<h2>Nota bene</h2>
+
+<p>As with normal protected and private methods, you cannot use <code>method_exists</code> to check if a 
+method is callable or not, as it will return true no matter what the visibility is. You have to use <code>is_callable</code>:</p>
+
+<pre><code class="php">php &gt; var_dump(is_callable([$driver, 'methodOne']));
+bool(true)
+php &gt; var_dump(is_callable([$driver, 'methodTwo']));
+bool(false)
+</code></pre>
+
+<p>That's it, have fun!</p>
+]]></content>
+        </entry>
             <entry>
             <title type="html"><![CDATA[A little handy tool: PSR Police]]></title>
             <link href="/blog/2015/03/03/a-little-handy-tool-psr-police"/>
