@@ -3,7 +3,7 @@
     <title><![CDATA[Stefano]]></title>
     <link href="/atom.xml" rel="self"/>
     <link href="/"/>
-    <updated>2015-03-03T23:04:08+01:00</updated>
+    <updated>2015-03-04T00:16:08+01:00</updated>
     <id>/</id>
         <generator uri="http://sculpin.io/">Sculpin</generator>
             <entry>
@@ -11,9 +11,14 @@
             <link href="/blog/2015/03/04/how-to-hide-a-class-method-in-php"/>
             <updated>2015-03-04T00:00:00+01:00</updated>
             <id>/blog/2015/03/04/how-to-hide-a-class-method-in-php</id>
-            <content type="html"><![CDATA[<p>In languages such as Java you can <a href="http://docs.oracle.com/javase/tutorial/java/IandI/override.html">hide methods</a> by overriding a public method of the superclass with a protected or private method in the subclass.</p>
+            <content type="html"><![CDATA[<p>Normally, when you extend a class and ovveride one method, you can change its visibility,
+but only to widen it. You can make a <em>private</em> method <em>protected</em> or <em>public</em>, and a 
+<em>protected</em> method <em>public</em>. This is because restricting the visibility of a method would
+break the <a href="http://en.wikipedia.org/wiki/Liskov_substitution_principle">Liskov substitution principle</a>
+as it would not allow to use the subclass in place of its superclass.</p>
 
-<p>PHP does not supports this with the classical inheritance, and will fail badly if you even try:</p>
+<p>This is also true for PHP at least when you use classical inheritance, and will fail badly if you even
+try to override a public method with a private or protected one:</p>
 
 <pre><code class="php">class Utility { 
     public function methodTwo()
@@ -35,7 +40,7 @@ class Driver extends Utility
 <pre><code>PHP Fatal error:  Access level to Utility::methodTwo() must be public (as in class Utility) in php shell code on line 1
 </code></pre>
 
-<p>If you're trying to reduce the visibility of a method of an existing class, you're out of luck. You'll
+<p>So, if you're trying to reduce the visibility of a method of an existing class, you're out of luck. You'll
 have to either override the method to make it throw a <code>BadMethodException</code>, change the code of the
 superclass or, perhaps, just live with it.</p>
 
